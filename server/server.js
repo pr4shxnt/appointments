@@ -20,7 +20,7 @@ async function createAdminOnce() {
     const adminCount = await User.countDocuments();
 
     if (adminCount === 0) {
-      const email = process.env.ADMIN_EMAIL ;
+      const email = process.env.ADMIN_EMAIL;
       const password = process.env.ADMIN_PASSWORD;
 
       await createAdminDirect(email, password);
@@ -49,7 +49,7 @@ app.use("/api/bookings", require("./routes/bookings"));
 app.use("/api/otp", require("./routes/otp"));
 
 app.get("/", (req, res) => {
-  res.send("Calendly MVP API is running");
+  res.send(`This server belongs to ${process.env.ADMIN_NAME}`);
 });
 
 app.listen(PORT, () => {

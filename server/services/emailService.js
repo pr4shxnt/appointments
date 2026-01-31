@@ -42,7 +42,7 @@ ${content}
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin-top:16px;">
 <tr>
 <td align="center" style="font-size:12px;color:#9ca3af;font-family:Arial,Helvetica,sans-serif;">
-<a target="_blank" href="https://prashantadhikari7.com.np">Prashant Adhikari</a> | All rights reserved ${new Date().getFullYear()}
+<a target="_blank" href="${process.env.ADMIN_URL}">${process.env.ADMIN_NAME}</a> | All rights reserved ${new Date().getFullYear()}
 </td>
 </tr>
 </table>
@@ -122,12 +122,12 @@ const generateICS = (booking, duration = 30) =>
         start,
         startInputType: "utc", // Explicitly define as UTC
         duration: { minutes: duration },
-        title: "Appointment with Prashant Adhikari",
+        title: "Appointment with ${process.env.ADMIN_NAME}",
         location: process.env.MEET_LINK,
         url: process.env.MEET_LINK,
         description: booking.note || "",
         organizer: {
-          name: "Prashant Adhikari",
+          name: "${process.env.ADMIN_NAME}",
           email: process.env.EMAIL_USER,
         },
         attendees: [{ email: booking.email, name: booking.name }],
@@ -166,9 +166,9 @@ ${button("Join meeting", process.env.MEET_LINK)}
   const ics = await generateICS(booking, duration);
 
   await transporter.sendMail({
-    from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
+    from: `"${process.env.ADMIN_NAME}" <${process.env.EMAIL_USER}>`,
     to: booking.email,
-    subject: `Meeting Schedule with Prashant Adhikari on ${booking.date} at ${booking.time}`,
+    subject: `Meeting Schedule with ${process.env.ADMIN_NAME} on ${booking.date} at ${booking.time}`,
     html: emailTemplate(content),
     attachments: [
       {
@@ -235,7 +235,7 @@ Join meeting →
   const ics = await generateICS(booking, duration);
 
   await transporter.sendMail({
-    from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
+    from: `"${process.env.ADMIN_NAME}" <${process.env.EMAIL_USER}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `New booking: ${booking.name} • ${booking.date} ${booking.time}`,
     html: emailTemplate(content),
@@ -256,7 +256,7 @@ Join meeting →
 const sendOTPEmail = async (email, otp) => {
   const content = `
 ${heading("Verify your email")}
-${subtext("Enter this code to verify your email. Do not share this OTP with anyone. Prashant Adhikari will never ask for your OTP. He already has.")}
+${subtext("Enter this code to verify your email. Do not share this OTP with anyone. ${process.env.ADMIN_NAME} will never ask for your OTP. He already has.")}
 
 <tr>
 <td align="center" style="padding:20px 0;font-size:32px;font-weight:600;letter-spacing:6px;color:#111827;">
@@ -266,7 +266,7 @@ ${otp}
 `;
 
   await transporter.sendMail({
-    from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
+    from: `"${process.env.ADMIN_NAME}" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verification code for meeting scheduling",
     html: emailTemplate(content),
@@ -359,7 +359,7 @@ ${button("Join meeting", meetLink)}
   const ics = await generateICS(booking, duration);
 
   await transporter.sendMail({
-    from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
+    from: `"${process.env.ADMIN_NAME}" <${process.env.EMAIL_USER}>`,
     to: booking.email,
     subject: `Reminder: Meeting in ${remaining}`,
     html: emailTemplate(content),
