@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const { createEvent } = require("ics");
-const { zonedTimeToUtc } = require("date-fns-tz");
+const { fromZonedTime } = require("date-fns-tz");
 
 /* =====================================================
    TRANSPORTER
@@ -106,7 +106,7 @@ const generateICS = (booking, duration = 30) =>
     // Convert Kathmandu time to UTC components for absolute time
     const timeZone = process.env.ADMIN_TIMEZONE || "Asia/Kathmandu";
     const dateTimeStr = `${booking.date} ${booking.time}`;
-    const utcDate = zonedTimeToUtc(dateTimeStr, timeZone);
+    const utcDate = fromZonedTime(dateTimeStr, timeZone);
 
     // ICS library expects [y, m, d, h, min]. ics months are 1-indexed.
     const start = [
@@ -168,7 +168,7 @@ ${button("Join meeting", process.env.MEET_LINK)}
   await transporter.sendMail({
     from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
     to: booking.email,
-    subject: `Booking confirmed | ${booking.date} at ${booking.time}`,
+    subject: `Meeting Schedule with Prashant Adhikari on ${booking.date} at ${booking.time}`,
     html: emailTemplate(content),
     attachments: [
       {
@@ -285,7 +285,7 @@ const sendReminderEmail = async (booking, duration = 30) => {
      Calculate time remaining
   --------------------------*/
   const now = new Date();
-  const appointment = zonedTimeToUtc(
+  const appointment = fromZonedTime(
     `${booking.date} ${booking.time}`,
     timeZone,
   );
@@ -305,17 +305,38 @@ const sendReminderEmail = async (booking, duration = 30) => {
 
   const content = `
 ${heading("Upcoming meeting reminder")}
-${subtext("Just a quick heads up — your meeting is starting soon.")}
+${subtext("Just a quick heads up — your meeting starts soon.")}
 
+${
+  remaining
+    ? `
 <tr>
-<td style="padding-bottom:16px;font-size:13px;color:#374151;">
-⏰ Starts in <strong>${remaining}</strong>
+<td align="center" style="padding:14px 0;">
+  <table cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="
+        background:#f3f4f6;
+        padding:10px 18px;
+        border-radius:6px;
+        font-size:18px;
+        font-weight:600;
+        font-family:monospace;
+        color:#111827;">
+        ${remaining}
+      </td>
+    </tr>
+  </table>
 </td>
 </tr>
+`
+    : ""
+}
 
 <tr>
 <td>
-<table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:12px 0;">
+<table width="100%" cellpadding="0" cellspacing="0"
+style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:12px 0;">
+
 ${row("Name", booking.name)}
 ${row("Date", booking.date)}
 ${row("Time", booking.time)}
@@ -324,23 +345,12 @@ ${row(
   `<a href="${meetLink}" style="color:#2563eb;text-decoration:none;">Google Meet</a>`,
 )}
 ${booking.note ? row("Note", booking.note) : ""}
+
 </table>
 </td>
 </tr>
 
 ${button("Join meeting", meetLink)}
-
-<tr>
-<td style="padding-top:18px;font-size:12px;color:#6b7280;line-height:1.6;">
-Need to reschedule or cancel? Simply reply to this email and I’ll update it for you.
-</td>
-</tr>
-
-<tr>
-<td style="padding-top:10px;font-size:12px;color:#9ca3af;">
-Add this event to your calendar using the attached invite.
-</td>
-</tr>
 `;
 
   /* -------------------------

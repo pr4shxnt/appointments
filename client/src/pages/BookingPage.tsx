@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isSameDay } from "date-fns";
+import { fromZonedTime, toZonedTime, format as formatTz } from "date-fns-tz";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
   fetchSlots,
@@ -18,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Calendar, Clock, CheckCircle } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Globe } from "lucide-react";
 import api from "../api/axios";
 
 export default function BookingPage() {
@@ -35,6 +36,27 @@ export default function BookingPage() {
     email: "",
     note: "",
   });
+
+  // Timezone State
+  const [userTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
+  const adminTimezone = "Asia/Kathmandu"; // Hardcoded for now, or fetch from config
+
+  // Convert Admin Time Slot to User Local Time String
+  const convertToUserTime = (slotTime: string, date: Date) => {
+    try {
+      const dateStr = format(date, "yyyy-MM-dd");
+      // Create date object in Admin Timezone
+      const adminDate = fromZonedTime(`${dateStr} ${slotTime}`, adminTimezone);
+      // Convert to User Timezone
+      const userDate = toZonedTime(adminDate, userTimezone);
+      // Format to readable time
+      return formatTz(userDate, "h:mm a", { timeZone: userTimezone });
+    } catch (e) {
+      return slotTime;
+    }
+  };
 
   // OTP Verification State
   const [emailVerified, setEmailVerified] = useState(false);
@@ -169,6 +191,12 @@ export default function BookingPage() {
                 {selectedDate
                   ? `Available slots for ${format(selectedDate, "MMM dd, yyyy")}`
                   : "Select a date first"}
+                {selectedDate && (
+                  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                    <Globe className="w-3 h-3" />
+                    <span>Times shown in {userTimezone}</span>
+                  </div>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -176,16 +204,21 @@ export default function BookingPage() {
                 <p className="text-center text-gray-500">Loading slots...</p>
               ) : slots.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2">
-                  {slots.map((slot) => (
-                    <Button
-                      key={slot}
-                      variant={selectedTime === slot ? "default" : "outline"}
-                      onClick={() => handleTimeSelect(slot)}
-                      size="sm"
-                    >
-                      {slot}
-                    </Button>
-                  ))}
+                  {slots.map((slot) => {
+                    const displayTime = selectedDate
+                      ? convertToUserTime(slot, selectedDate)
+                      : slot;
+                    return (
+                      <Button
+                        key={slot}
+                        variant={selectedTime === slot ? "default" : "outline"}
+                        onClick={() => handleTimeSelect(slot)}
+                        size="sm"
+                      >
+                        {displayTime}
+                      </Button>
+                    );
+                  })}
                 </div>
               ) : selectedDate ? (
                 <p className="text-center text-gray-500">
