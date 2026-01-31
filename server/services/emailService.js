@@ -171,31 +171,89 @@ ${button("Join meeting", process.env.MEET_LINK)}
    ADMIN NOTIFICATION
 ===================================================== */
 
-const sendAdminNotification = async (booking) => {
+const sendAdminNotification = async (booking, duration = 30) => {
+  const meetLink = process.env.MEET_LINK;
+  const dashboardLink =
+    process.env.ADMIN_DASHBOARD || "http://localhost:5173/admin/dashboard";
+
+  /* -------------------------
+     Format nicer date/time
+  --------------------------*/
+  const dateObj = new Date(`${booking.date}T${booking.time}`);
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const formattedTime = dateObj.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  /* -------------------------
+     Email content
+  --------------------------*/
+
   const content = `
 ${heading("New booking")}
-${subtext(`${booking.name} has scheduled a meeting.`)}
+${subtext("You have a new scheduled meeting.")}
+
+<!-- quick summary line -->
+<tr>
+<td style="padding-bottom:16px;font-size:13px;color:#374151;">
+<strong>${booking.name}</strong> booked a call for
+<strong>${formattedDate}</strong> at <strong>${formattedTime}</strong>
+</td>
+</tr>
 
 <tr>
 <td>
-<table width="100%" cellpadding="0" cellspacing="0">
+<table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:12px 0;">
 ${row("Name", booking.name)}
-${row("Email", booking.email)}
-${row("Date", booking.date)}
-${row("Time", booking.time)}
+${row("Email", `<a href="mailto:${booking.email}" style="color:#2563eb;text-decoration:none;">${booking.email}</a>`)}
+${row("Date", formattedDate)}
+${row("Time", formattedTime)}
+${row(
+  "Location",
+  `<a href="${meetLink}" style="color:#2563eb;text-decoration:none;">Google Meet</a>`,
+)}
 ${booking.note ? row("Note", booking.note) : ""}
 </table>
 </td>
 </tr>
 
-${button("Open dashboard", "http://localhost:5173/admin/dashboard")}
+<!-- primary action -->
+${button("Open dashboard", dashboardLink)}
+
+<!-- secondary action -->
+<tr>
+<td style="padding-top:10px;">
+<a href="${meetLink}" style="font-size:13px;color:#2563eb;text-decoration:none;">
+Join meeting →
+</a>
+</td>
+</tr>
 `;
+
+  /* -------------------------
+     Add calendar invite
+  --------------------------*/
+
+  const ics = await generateICS(booking, duration);
 
   await transporter.sendMail({
     from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
     to: process.env.ADMIN_EMAIL,
-    subject: `${booking.name} has scheduled a meeting.`,
+    subject: `New booking: ${booking.name} • ${formattedDate} ${formattedTime}`,
     html: emailTemplate(content),
+    attachments: [
+      {
+        filename: "invite.ics",
+        content: ics,
+        contentType: "text/calendar",
+      },
+    ],
   });
 };
 
@@ -227,28 +285,85 @@ ${otp}
    REMINDER
 ===================================================== */
 
-const sendReminderEmail = async (booking) => {
+const sendReminderEmail = async (booking, duration = 30) => {
+  const meetLink = process.env.MEET_LINK;
+
+  /* -------------------------
+     Calculate time remaining
+  --------------------------*/
+  const now = new Date();
+  const appointment = new Date(`${booking.date}T${booking.time}`);
+  const diffMs = appointment - now;
+
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+
+  let remaining = "";
+  if (hours > 0)
+    remaining = `${hours} hour${hours > 1 ? "s" : ""} ${minutes} min`;
+  else remaining = `${minutes} minutes`;
+
+  /* -------------------------
+     Email content
+  --------------------------*/
+
   const content = `
-${heading("Reminder")}
-${subtext("Your meeting starts soon.")}
+${heading("Upcoming meeting reminder")}
+${subtext("Just a quick heads up — your meeting is starting soon.")}
+
+<tr>
+<td style="padding-bottom:16px;font-size:13px;color:#374151;">
+⏰ Starts in <strong>${remaining}</strong>
+</td>
+</tr>
 
 <tr>
 <td>
-<table width="100%" cellpadding="0" cellspacing="0">
+<table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:12px 0;">
+${row("Name", booking.name)}
 ${row("Date", booking.date)}
 ${row("Time", booking.time)}
+${row(
+  "Location",
+  `<a href="${meetLink}" style="color:#2563eb;text-decoration:none;">Google Meet</a>`,
+)}
+${booking.note ? row("Note", booking.note) : ""}
 </table>
 </td>
 </tr>
 
-${button("Join meeting", process.env.MEET_LINK)}
+${button("Join meeting", meetLink)}
+
+<tr>
+<td style="padding-top:18px;font-size:12px;color:#6b7280;line-height:1.6;">
+Need to reschedule or cancel? Simply reply to this email and I’ll update it for you.
+</td>
+</tr>
+
+<tr>
+<td style="padding-top:10px;font-size:12px;color:#9ca3af;">
+Add this event to your calendar using the attached invite.
+</td>
+</tr>
 `;
+
+  /* -------------------------
+     Attach calendar (.ics)
+  --------------------------*/
+  const ics = await generateICS(booking, duration);
 
   await transporter.sendMail({
     from: `"Prashant Adhikari" <${process.env.EMAIL_USER}>`,
     to: booking.email,
-    subject: "Meeting reminder",
+    subject: `Reminder: Meeting in ${remaining}`,
     html: emailTemplate(content),
+    attachments: [
+      {
+        filename: "invite.ics",
+        content: ics,
+        contentType: "text/calendar",
+      },
+    ],
   });
 };
 
