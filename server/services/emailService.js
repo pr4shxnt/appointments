@@ -122,12 +122,12 @@ const generateICS = (booking, duration = 30) =>
         start,
         startInputType: "utc", // Explicitly define as UTC
         duration: { minutes: duration },
-        title: "Appointment with ${process.env.ADMIN_NAME}",
+        title: `Appointment with ${process.env.ADMIN_NAME}`,
         location: process.env.MEET_LINK,
         url: process.env.MEET_LINK,
         description: booking.note || "",
         organizer: {
-          name: "${process.env.ADMIN_NAME}",
+          name: process.env.ADMIN_NAME,
           email: process.env.EMAIL_USER,
         },
         attendees: [{ email: booking.email, name: booking.name }],
@@ -256,7 +256,7 @@ Join meeting →
 const sendOTPEmail = async (email, otp) => {
   const content = `
 ${heading("Verify your email")}
-${subtext("Enter this code to verify your email. Do not share this OTP with anyone. ${process.env.ADMIN_NAME} will never ask for your OTP. He already has.")}
+${subtext(`Enter this code to verify your email. Do not share this OTP with anyone. ${process.env.ADMIN_NAME} will never ask for your OTP. He already has.`)}
 
 <tr>
 <td align="center" style="padding:20px 0;font-size:32px;font-weight:600;letter-spacing:6px;color:#111827;">
