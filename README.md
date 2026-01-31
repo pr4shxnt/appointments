@@ -1,7 +1,5 @@
 <div align="center">
-  <div style="width: 100px;">
-    <img src="./assets/logo.png" alt="Book me logo" />
-  </div>
+  <img src="./assets/logo.png" alt="BookMe Logo" width="80" />
   <h1> <strong>Book</strong>: The Open-Source Scheduling Infrastructure for Professionals</h1>
   <p></p>
 
