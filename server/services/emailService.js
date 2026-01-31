@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const { createEvent } = require("ics");
+const { zonedTimeToUtc } = require("date-fns-tz");
 
 /* =====================================================
    TRANSPORTER
@@ -102,12 +103,24 @@ ${text}
 
 const generateICS = (booking, duration = 30) =>
   new Promise((resolve, reject) => {
-    const [y, m, d] = booking.date.split("-").map(Number);
-    const [h, min] = booking.time.split(":").map(Number);
+    // Convert Kathmandu time to UTC components for absolute time
+    const timeZone = process.env.ADMIN_TIMEZONE || "Asia/Kathmandu";
+    const dateTimeStr = `${booking.date} ${booking.time}`;
+    const utcDate = zonedTimeToUtc(dateTimeStr, timeZone);
+
+    // ICS library expects [y, m, d, h, min]. ics months are 1-indexed.
+    const start = [
+      utcDate.getUTCFullYear(),
+      utcDate.getUTCMonth() + 1,
+      utcDate.getUTCDate(),
+      utcDate.getUTCHours(),
+      utcDate.getUTCMinutes(),
+    ];
 
     createEvent(
       {
-        start: [y, m, d, h, min],
+        start,
+        startInputType: "utc", // Explicitly define as UTC
         duration: { minutes: duration },
         title: "Appointment with Prashant Adhikari",
         location: process.env.MEET_LINK,
@@ -266,13 +279,17 @@ ${otp}
 
 const sendReminderEmail = async (booking, duration = 30) => {
   const meetLink = process.env.MEET_LINK;
+  const timeZone = process.env.ADMIN_TIMEZONE || "Asia/Kathmandu";
 
   /* -------------------------
      Calculate time remaining
   --------------------------*/
   const now = new Date();
-  const appointment = new Date(`${booking.date}T${booking.time}`);
-  const diffMs = appointment - now;
+  const appointment = zonedTimeToUtc(
+    `${booking.date} ${booking.time}`,
+    timeZone,
+  );
+  const diffMs = appointment.getTime() - now.getTime();
 
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
