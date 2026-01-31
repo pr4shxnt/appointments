@@ -83,8 +83,12 @@ const createBooking = async (req, res) => {
     const booking = new Booking({ name, email, date, time, note });
     await booking.save();
 
+    // Get availability duration for the booking date
+    const availability = await Availability.findOne({ date });
+    const duration = availability ? availability.duration : 30;
+
     // Send emails
-    await sendBookingConfirmation(booking);
+    await sendBookingConfirmation(booking, duration);
     await sendAdminNotification(booking);
 
     res.status(201).json({ message: "Booking created successfully", booking });
