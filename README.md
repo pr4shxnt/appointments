@@ -130,6 +130,14 @@ Before deploying, ensure you have all the values listed in the **Environment Con
 
 ---
 
+### Want direct Help ?
+
+> You can contact me at [prashantadhikari7.com.np](https://prashantadhikari7.com.np).
+> <br />
+> Or
+> <br />
+> Book a meeting with me at [BookMe](https://book.prashantadhikari7.com.np).
+
 ## Contribution Guidelines
 
 We welcome contributions from the developer community to enhance the stability and feature set of BookMe.
