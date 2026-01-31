@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="./assets/logo.png" alt="BookMe Logo" width="80" />
-  <h1> <strong>Book</strong>: The Open-Source Scheduling Infrastructure for Professionals</h1>
+  <img src="./assets/logo.png" alt="BookMe Logo" width="300" />
+  <h1> <strong>BookMe</strong>: The Open-Source Scheduling Infrastructure for Professionals</h1>
   <p></p>
 
   <p>
@@ -23,6 +23,7 @@
     <img src="https://img.shields.io/badge/Nodemailer-000000?style=flat-square&logo=gmail&logoColor=white" />
     <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=json-web-tokens&logoColor=white" />
     <img src="https://img.shields.io/badge/ICS_Generator-000000?style=flat-square&logo=calendar" />
+    <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white" />
   </p>
 </div>
 
@@ -30,7 +31,7 @@
 
 ## Introduction
 
-Book is a robust, self-hosted scheduling platform designed to replace proprietary booking services. It offers a complete infrastructure for managing appointments, availability, and client communications without relying on third-party SaaS providers. Built with a focus on data sovereignty, performance, and aesthetic minimalism, Book provides a white-label solution that adapts instantly to the user's brand identity.
+BookMe is a robust, self-hosted scheduling platform designed to replace proprietary bookMeing services. It offers a complete infrastructure for managing appointments, availability, and client communications without relying on third-party SaaS providers. Built with a focus on data sovereignty, performance, and aesthetic minimalism, BookMe provides a white-label solution that adapts instantly to the user's brand identity.
 
 ## The Problem
 
@@ -43,7 +44,7 @@ In the current digital landscape, professionals face several critical issues wit
 
 ## The Solution
 
-Book addresses these challenges by providing a 100% open-source, deployable architecture that solves the scheduling problem at the infrastructure level.
+BookMe addresses these challenges by providing a 100% open-source, deployable architecture that solves the scheduling problem at the infrastructure level.
 
 1.  **Zero Cost & Sustainability**: Designed to run on free tiers of modern cloud providers (like Vercel and MongoDB Atlas), eliminating recurring subscription costs entirely.
 2.  **Total Data Sovereignty**: The user owns the database. All client information, appointment details, and logs remain in the user's private control.
@@ -58,15 +59,15 @@ The application is architected as a decoupled client-server system, ensuring sca
 
 The user interface is constructed using **React 19** and **TypeScript**, leveraging **Vite** for optimized build performance.
 
-- **State Management**: Redux Toolkit manages complex application states, including booking flows and availability slots.
+- **State Management**: Redux Toolkit manages complex application states, including bookMeing flows and availability slots.
 - **Styling**: Tailwind CSS combined with ShadcnUI provides a design system that is responsive, accessible, and theme-consistent.
-- **Routing**: React Router manages navigation between public booking views and the secure administrative dashboard.
+- **Routing**: React Router manages navigation between public bookMeing views and the secure administrative dashboard.
 
 ### Backend (Server)
 
 The API layer is built with **Node.js** and **Express**, adhering to RESTful principles.
 
-- **Database**: MongoDB (via Mongoose) stores unstructured data for availability rules, booking records, and user credentials.
+- **Database**: MongoDB (via Mongoose) stores unstructured data for availability rules, bookMeing records, and user credentials.
 - **Security**: Authentication is handled via JSON Web Tokens (JWT). Critical operations employ One-Time Passwords (OTP) for enhanced security.
 - **Scheduling Logic**: A dedicated service handles timezone conversions using `date-fns-tz`, ensuring accurate slot calculations across global timezones.
 - **Communications**: Nodemailer facilitates transactional emails, wrapping content in responsive HTML templates.
@@ -131,7 +132,7 @@ Before deploying, ensure you have all the values listed in the **Environment Con
 
 ## Contribution Guidelines
 
-We welcome contributions from the developer community to enhance the stability and feature set of Book.
+We welcome contributions from the developer community to enhance the stability and feature set of BookMe.
 
 1.  **Fork the Project**: Create your own copy of the repository.
 2.  **Create a Feature Branch**: Work on your feature in a dedicated branch (`git checkout -b feature/AmazingFeature`).
